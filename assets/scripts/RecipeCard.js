@@ -1,8 +1,9 @@
 class RecipeCard extends HTMLElement {
   constructor() {
     // Part 1 Expose - TODO
-
+    super();
     // You'll want to attach the shadow DOM here
+    this.attachShadow({mode: 'open'});
   }
 
   set data(data) {
@@ -84,9 +85,74 @@ class RecipeCard extends HTMLElement {
       }
     `;
     styleElem.innerHTML = styles;
+    console.log("working");
+    console.log(data);
 
     // Here's the root element that you'll want to attach all of your other elements to
     const card = document.createElement('article');
+    
+    let cardImg = document.createElement('img');
+    cardImg.setAttribute('src', searchForKey(data, 'thumbnailUrl'));
+    cardImg.setAttribute('alt', searchForKey(data, 'headline'));
+    
+    let cardParagraph = document.createElement('p');
+    cardParagraph.className = "title";
+
+    let cardLink = document.createElement('a');
+    cardLink.setAttribute('href', getUrl(data));
+    cardLink.textContent = searchForKey(data, 'headline');
+    cardParagraph.append(cardLink);
+
+    let organizationParagraph = document.createElement("p");
+    organizationParagraph.className = "organization";
+    organizationParagraph.textContent = getOrganization(data);
+
+    let ratingDiv = document.createElement("div"); 
+    ratingDiv.className = "rating";
+    let avgRating = document.createElement("span");
+    let ratingVal;
+    let ratingCount;
+    let rating = searchForKey(data, "aggregateRating");
+    let ratingImg = document.createElement("img");
+    let ratingCountSpan = document.createElement("span");
+   
+    if(rating != null){
+      ratingVal = rating["ratingValue"];
+      ratingCount = rating["ratingCount"];
+      avgRating.textContent = parseFloat(ratingVal);
+      let numStars = Math.round(parseFloat(ratingVal));
+      ratingImg.src = `assets/images/icons/${numStars}-star.svg`; 
+      ratingImg.alt = `${numStars} stars`;
+      ratingCountSpan.textContent = ratingCount;
+
+      ratingDiv.appendChild(avgRating);
+      ratingDiv.appendChild(ratingImg);
+      ratingDiv.appendChild(ratingCountSpan);
+    }else {
+      let noRatingSpan = document.createElement("span"); 
+      noRatingSpan.textContent = "No Reviews";
+      ratingDiv.appendChild(noRatingSpan);
+    }
+
+    let time = document.createElement("time");
+    let totalTime = searchForKey(data, "totalTime");
+    time.textContent = convertTime(totalTime);
+
+   let cardDescription = document.createElement('p');
+    cardDescription.className = "ingredients"
+   let ingredients = createIngredientList(searchForKey(data, "recipeIngredient"))
+    cardDescription.textContent = ingredients;
+
+    card.appendChild(cardImg);
+    card.appendChild(cardParagraph)
+    card.appendChild(organizationParagraph)
+    card.appendChild(ratingDiv);
+    card.appendChild(time);
+    card.appendChild(cardDescription);
+
+    this.shadowRoot.append(styleElem, card)
+    
+
 
     // Some functions that will be helpful here:
     //    document.createElement()
@@ -100,6 +166,7 @@ class RecipeCard extends HTMLElement {
     // created in the constructor()
 
     // Part 1 Expose - TODO
+
   }
 }
 
